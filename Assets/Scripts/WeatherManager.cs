@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,12 +6,28 @@ using UnityEngine.Networking;
 
 public class WeatherManager : MonoBehaviour
 {
+    public Transform mainLight;
+
     void Start()
     {
         StartCoroutine(GetWeather(Utility.Instance.GetURL(CityName.Chandigarh, true)));
+        StartCoroutine(SunRotation());
     }
 
-    private IEnumerator GetWeather(string requestURL)
+    IEnumerator SunRotation()
+    {
+        string[] hoursMin = DateTime.Now.ToString("HH:mm").Split(':');
+        int hours = int.Parse(hoursMin[0]), mins = int.Parse(hoursMin[1]);
+        const float degPerMinute = 360 / (24 * 60);
+
+        while (gameObject.activeInHierarchy)
+        {
+            mainLight.rotation = Quaternion.Euler(270 + (hours * 60 + mins) * degPerMinute, 0, 0);
+            yield return new WaitForSeconds(60);
+        }
+    }
+
+    IEnumerator GetWeather(string requestURL)
     {
         using (UnityWebRequest weatherRequest = UnityWebRequest.Get(requestURL))
         {
