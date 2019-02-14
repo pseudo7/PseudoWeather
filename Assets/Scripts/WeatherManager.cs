@@ -6,11 +6,9 @@ using UnityEngine.Networking;
 
 public class WeatherManager : MonoBehaviour
 {
-    string URL = "api.openweathermap.org/data/2.5/weather?id=1268782&APIKEY=1d5f9f9b27a4b4345f8fc69f597a7dbe&units=metric";
-
     void Start()
     {
-        StartCoroutine(GetWeather(URL));
+        StartCoroutine(GetWeather(Utility.Instance.GetURL(CityName.Chandigarh, true)));
     }
 
     private IEnumerator GetWeather(string requestURL)
@@ -18,8 +16,18 @@ public class WeatherManager : MonoBehaviour
         using (UnityWebRequest weatherRequest = UnityWebRequest.Get(requestURL))
         {
             yield return weatherRequest.SendWebRequest();
-            Serializables.WeatherMain weatherMain = JsonUtility.FromJson<Serializables.WeatherMain>(weatherRequest.downloadHandler.text);
-            Debug.Log(weatherMain);
+            Serializables.WeatherMain weatherMainData = JsonUtility.FromJson<Serializables.WeatherMain>(weatherRequest.downloadHandler.text);
+            Debug.Log(weatherMainData);
+            using (UnityWebRequest iconRequest = UnityWebRequestTexture.GetTexture(Constants.WEATHER_ICON_URL + weatherMainData.weather[0].icon + ".png"))
+            {
+                yield return iconRequest.SendWebRequest();
+                Texture2D texture = new Texture2D(0, 0);
+                texture.LoadImage(iconRequest.downloadHandler.data);
+                Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
+                UIManager.Instance.SetIcon(icon);
+                UIManager.Instance.SetDescription(weatherMainData.weather[0].description);
+                UIManager.Instance.SetWeatherTitle(weatherMainData.weather[0].main);
+            }
         }
     }
 }

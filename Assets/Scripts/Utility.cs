@@ -7,37 +7,51 @@ public class Utility : MonoBehaviour
 {
     public static Utility Instance;
 
-    private void Awake()
+    void Awake()
     {
         if (!Instance)
             Instance = this;
-
-        string[] cityNames = Enum.GetNames(typeof(CityNames));
-        Array.Sort(cityNames);
-
-        foreach (var item in cityNames)
-            print(item);
     }
 
-    public string GetCityID(CityNames city)
+    public string GetURL(CityName cityName, bool isMetricUnits)
+    {
+        return string.Format("{0}{1}&{2}&{3}", Constants.MAIN_URL, GetCityID(cityName), Constants.API_KEY, isMetricUnits ? Constants.WEATHER_METRIC_UNITS : Constants.WEATHER_IMPERIAL_UNITS);
+    }
+
+    public string[] CityNames
+    {
+        get
+        {
+            string[] cityNames = Enum.GetNames(typeof(CityName));
+            Array.Sort(cityNames);
+            return cityNames;
+        }
+    }
+
+    string GetCityID(CityName city)
     {
         switch (city)
         {
-            case CityNames.Chandigarh: return "1274746";
-            case CityNames.Manali: return "1263968";
-            case CityNames.Delhi: return "1273294";
-            case CityNames.Mumbai: return "1275339";
-            case CityNames.Bangalore: return "1277333";
-            case CityNames.Hyderabad: return "1269843";
-            case CityNames.Kolkata: return "1275004";
-            case CityNames.Chennai: return "1264527";
+            case CityName.Chandigarh: return "1274746";
+            case CityName.Manali: return "1263968";
+            case CityName.Delhi: return "1273294";
+            case CityName.Mumbai: return "1275339";
+            case CityName.Bangalore: return "1277333";
+            case CityName.Hyderabad: return "1269843";
+            case CityName.Kolkata: return "1275004";
+            case CityName.Chennai: return "1264527";
             default: return "2172797";
         }
     }
 
+    public static string GetTitleCase(string str)
+    {
+        return new System.Globalization.CultureInfo("en-US", false).TextInfo.ToTitleCase(str);
+    }
+
 }
 
-public enum CityNames
+public enum CityName
 {
     Chandigarh, Manali, Delhi, Mumbai, Bangalore, Hyderabad, Kolkata, Chennai
 }
