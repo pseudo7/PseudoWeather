@@ -82,6 +82,28 @@ public class Serializables
         }
     }
 
+    [Serializable]
+    public class CityCollection
+    {
+        public CityInfo[] cities;
+    }
+
+
+    [Serializable]
+    public class CityInfo
+    {
+        public int id;
+        public string name;
+        public string country;
+        public Coordinates coord;
+
+        public override string ToString()
+        {
+            return string.Format("ID: {0}, Name: {1}, Country: {2}, Coordinates: {3}", id, name, country, coord);
+        }
+    }
+
+    [Serializable]
     public class WeatherMain
     {
         public Coordinates coord;

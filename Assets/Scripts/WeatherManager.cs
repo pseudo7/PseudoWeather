@@ -1,34 +1,57 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
 public class WeatherManager : MonoBehaviour
 {
+    public static WeatherManager Instance;
+
     public Transform mainLight;
+
+    static bool gettingWeather;
+
+    void Awake()
+    {
+        if (!Instance)
+            Instance = this;
+    }
 
     void Start()
     {
-        StartCoroutine(GetWeather(Utility.Instance.GetURL(CityName.Chandigarh, true)));
         StartCoroutine(SunRotation());
     }
 
     IEnumerator SunRotation()
     {
         string[] hoursMin = DateTime.Now.ToString("HH:mm").Split(':');
+
         int hours = int.Parse(hoursMin[0]), mins = int.Parse(hoursMin[1]);
-        const float degPerMinute = 360 / (24 * 60);
+        const float DEG_PER_MINUTE = 360f / (24 * 60);
+        var degToRotate = 270 + (hours * 60 + mins) * DEG_PER_MINUTE;
 
         while (gameObject.activeInHierarchy)
         {
-            mainLight.rotation = Quaternion.Euler(270 + (hours * 60 + mins) * degPerMinute, 0, 0);
+            mainLight.rotation = Quaternion.Euler(degToRotate, 0, 0);
             yield return new WaitForSeconds(60);
         }
     }
 
-    IEnumerator GetWeather(string requestURL)
+    public void GetWeather(string cityName)
     {
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+            if (!gettingWeather)
+                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, true)));
+            else Debug.LogError("Patience");
+        else Debug.LogError("NO INTERNET");
+    }
+
+    IEnumerator StartWeatherCoroutine(string requestURL)
+    {
+        gettingWeather = true;
+        Debug.Log("URL: " + requestURL);
         using (UnityWebRequest weatherRequest = UnityWebRequest.Get(requestURL))
         {
             yield return weatherRequest.SendWebRequest();
@@ -40,10 +63,12 @@ public class WeatherManager : MonoBehaviour
                 Texture2D texture = new Texture2D(0, 0);
                 texture.LoadImage(iconRequest.downloadHandler.data);
                 Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-                UIManager.Instance.SetIcon(icon);
-                UIManager.Instance.SetDescription(weatherMainData.weather[0].description);
-                UIManager.Instance.SetWeatherTitle(weatherMainData.weather[0].main);
+
+                UIManager.Instance.SetLocationAndTime(weatherMainData.name, new DateTime(TimeSpan.FromSeconds(weatherMainData.dt).Ticks + TimeSpan.FromHours(5.5).Ticks).ToShortTimeString());
+                UIManager.Instance.SetTemperature(weatherMainData.main.temp, weatherMainData.main.temp_max, weatherMainData.main.temp_min);
+                UIManager.Instance.SetWeatherDetails(icon, weatherMainData.weather[0].main, weatherMainData.weather[0].description);
             }
         }
+        gettingWeather = false;
     }
 }

@@ -1,57 +1,68 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
-public class Utility : MonoBehaviour
+public static class Utility
 {
-    public static Utility Instance;
+    static List<string> cityNames;
 
-    void Awake()
-    {
-        if (!Instance)
-            Instance = this;
-    }
-
-    public string GetURL(CityName cityName, bool isMetricUnits)
+    public static string GetURL(string cityName, bool isMetricUnits)
     {
         return string.Format("{0}{1}&{2}&{3}", Constants.MAIN_URL, GetCityID(cityName), Constants.API_KEY, isMetricUnits ? Constants.WEATHER_METRIC_UNITS : Constants.WEATHER_IMPERIAL_UNITS);
     }
 
-    public string[] CityNames
+    public static List<string> CityNames
     {
         get
         {
-            string[] cityNames = Enum.GetNames(typeof(CityName));
-            Array.Sort(cityNames);
+            if (cityNames == null)
+            {
+                cityNames = new List<string>();
+                foreach (var cityInfo in CitiesInfo) cityNames.Add(cityInfo.name);
+                cityNames.Sort();
+            }
             return cityNames;
         }
     }
 
-    string GetCityID(CityName city)
+    public static int CityCount
     {
-        switch (city)
+        get
         {
-            case CityName.Chandigarh: return "1274746";
-            case CityName.Manali: return "1263968";
-            case CityName.Delhi: return "1273294";
-            case CityName.Mumbai: return "1275339";
-            case CityName.Bangalore: return "1277333";
-            case CityName.Hyderabad: return "1269843";
-            case CityName.Kolkata: return "1275004";
-            case CityName.Chennai: return "1264527";
-            default: return "2172797";
+            return CityNames.Count;
         }
     }
+
+    public static int GetCityID(string cityName)
+    {
+        foreach (var info in CitiesInfo)
+            if (info.name.Equals(cityName)) return info.id;
+        return -1;
+    }
+
+    public static List<string> GetMatchCityNames(string keyword)
+    {
+        List<string> matches = new List<string>();
+
+        foreach (var cityName in CityNames) if (cityName.ToLower().StartsWith(keyword.ToLower())) matches.Add(cityName);
+
+        return matches;
+    }
+
+    public static Serializables.CityInfo[] CitiesInfo
+    {
+        get
+        {
+            var jsonData = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "CityNames.json"));
+            Serializables.CityCollection collection = JsonUtility.FromJson<Serializables.CityCollection>(jsonData);
+            return collection.cities;
+        }
+    }
+
 
     public static string GetTitleCase(string str)
     {
         return new System.Globalization.CultureInfo("en-US", false).TextInfo.ToTitleCase(str);
     }
-
-}
-
-public enum CityName
-{
-    Chandigarh, Manali, Delhi, Mumbai, Bangalore, Hyderabad, Kolkata, Chennai
 }

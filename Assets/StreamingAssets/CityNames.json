@@ -1,0 +1,76 @@
+{
+  "cities": [
+    {
+      "id": 1274746,
+      "name": "Chandigarh",
+      "country": "IN",
+      "coord": {
+        "lon": 76.793297,
+        "lat": 30.734301
+      }
+    },
+    {
+      "id": 1263967,
+      "name": "Manali",
+      "country": "IN",
+      "coord": {
+        "lon": 77.166672,
+        "lat": 32.26667
+      }
+    },
+    {
+      "id": 1277333,
+      "name": "Bangalore",
+      "country": "IN",
+      "coord": {
+        "lon": 77.603287,
+        "lat": 12.97623
+      }
+    },
+    {
+      "id": 1273294,
+      "name": "Delhi",
+      "country": "IN",
+      "coord": {
+        "lon": 77.216667,
+        "lat": 28.666668
+      }
+    },
+    {
+      "id": 1275339,
+      "name": "Mumbai",
+      "country": "IN",
+      "coord": {
+        "lon": 72.847939,
+        "lat": 19.01441
+      }
+    },
+    {
+      "id": 1264527,
+      "name": "Chennai",
+      "country": "IN",
+      "coord": {
+        "lon": 80.278473,
+        "lat": 13.08784
+      }
+    },
+    {
+      "id": 1269843,
+      "name": "Hyderabad",
+      "country": "IN",
+      "coord": {
+        "lon": 78.474442,
+        "lat": 17.37528
+      }
+    },
+    {
+      "id": 1275004,
+      "name": "Kolkata",
+      "country": "IN",
+      "coord": {
+        "lon": 88.36972,
+        "lat": 22.569719
+      }
+    }
+  ]
+}
