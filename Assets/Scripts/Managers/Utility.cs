@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public static class Utility
 {
     static List<string> cityNames;
+    public static Serializables.CityInfo[] cityInfos;
 
     public static string GetURL(string cityName, bool isMetricUnits)
     {
@@ -54,15 +56,19 @@ public static class Utility
     {
         get
         {
-            var jsonData = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "CityNames.json"));
-            Serializables.CityCollection collection = JsonUtility.FromJson<Serializables.CityCollection>(jsonData);
-            return collection.cities;
+            if (cityInfos == null)
+            {
+                var jsonData = Resources.Load<TextAsset>(Constants.CITIES_FILE_NAME);
+                Serializables.CityCollection collection = JsonUtility.FromJson<Serializables.CityCollection>(jsonData.text);
+                cityInfos = collection.cities;
+            }
+            return cityInfos;
         }
     }
 
     public static string GetTimeFromUNIX(long unixTimeStamp)
     {
-        return new DateTime(TimeSpan.FromSeconds(unixTimeStamp).Ticks + TimeSpan.FromHours(5.5).Ticks).ToShortTimeString();
+        return new DateTime(TimeSpan.FromSeconds(unixTimeStamp).Ticks + TimeSpan.FromHours(5.5).Ticks).ToString("hh:mm tt");
     }
 
     public static string GetTitleCase(string str)

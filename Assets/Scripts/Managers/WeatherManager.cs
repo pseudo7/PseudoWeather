@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -24,6 +23,12 @@ public class WeatherManager : MonoBehaviour
         StartCoroutine(SunRotation());
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
+    }
+
     IEnumerator SunRotation()
     {
         string[] hoursMin = DateTime.Now.ToString("HH:mm").Split(':');
@@ -41,6 +46,11 @@ public class WeatherManager : MonoBehaviour
 
     public void GetWeather(string cityName)
     {
+        if (!Utility.CityNames.Contains(cityName))
+        {
+            Debug.LogError("Incorrect Name");
+            return;
+        }
         if (Application.internetReachability != NetworkReachability.NotReachable)
             if (!gettingWeather)
                 StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, false)));
@@ -72,6 +82,7 @@ public class WeatherManager : MonoBehaviour
                 UIManager.Instance.SetWeatherDetails(icon, weatherMainData.weather[0].main, weatherMainData.weather[0].description);
             }
         }
+        UIManager.Instance.ToggleScrollView(true);
         gettingWeather = false;
     }
 }

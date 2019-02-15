@@ -5,4 +5,6 @@
     public const string API_KEY = "APIKEY=1d5f9f9b27a4b4345f8fc69f597a7dbe";
     public const string WEATHER_METRIC_UNITS = "units=metric";
     public const string WEATHER_IMPERIAL_UNITS = "units=imperial";
+    public const string CITIES_FILE_NAME = "CityNames";
+    public static string ANDROID_URI_PATH = "jar:file://" + UnityEngine.Application.dataPath + "!/assets/";
 }

@@ -26,7 +26,6 @@ public class SpiralMeter : MonoBehaviour
 
     IEnumerator FillMeter(float val)
     {
-        Debug.Log("VALE: " + val);
         var fillStep = 1f / fillSpeed;
         meterImg.fillAmount = 0;
         yield return new WaitForEndOfFrame();

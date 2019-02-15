@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
-
+    [Header("Misc")]
+    public Transform masterScroll;
     public Image weatherIcon;
     [Header("Temperature")]
     public Text currentTemp;
@@ -50,7 +51,7 @@ public class UIManager : MonoBehaviour
         long diff = sunsetTicks - now;
         if (diff > 0)
             timeLeftText.text = string.Format("Time Left\n{0} Hours", new DateTime(diff).ToString("HH:mm"));
-        else Debug.LogError("Already Sunset");
+        else timeLeftText.text = "Already Sunset";
         sunMeter.SetMeterValue(now / (float)sunsetTicks * 100);
     }
 
@@ -88,5 +89,33 @@ public class UIManager : MonoBehaviour
         weatherIcon.sprite = iconSprite;
         weatherTitleText.text = title;
         descriptionText.text = Utility.GetTitleCase(desc);
+    }
+
+    public void ToggleScrollView(bool show)
+    {
+        StartCoroutine(ToggleScroll(show));
+    }
+
+    IEnumerator ToggleScroll(bool show)
+    {
+        if (show)
+        {
+            yield return new WaitForEndOfFrame();
+            var targetScale = Vector3.one;
+            while (masterScroll.localScale != targetScale)
+            {
+                masterScroll.localScale = Vector3.MoveTowards(masterScroll.localScale, targetScale, .05f);
+                yield return new WaitForEndOfFrame();
+            }
+        }
+        else
+        {
+            var targetScale = new Vector3(1, 0, 1);
+            while (masterScroll.localScale != targetScale)
+            {
+                masterScroll.localScale = Vector3.MoveTowards(masterScroll.localScale, targetScale, .05f);
+                yield return new WaitForEndOfFrame();
+            }
+        }
     }
 }
