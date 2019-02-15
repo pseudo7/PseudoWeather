@@ -64,8 +64,8 @@ public class WeatherManager : MonoBehaviour
                 texture.LoadImage(iconRequest.downloadHandler.data);
                 Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
 
-                UIManager.Instance.SetComfort(weatherMainData.main.humidity);
-                UIManager.Instance.SetLocationAndTime(weatherMainData.name, new DateTime(TimeSpan.FromSeconds(weatherMainData.dt).Ticks + TimeSpan.FromHours(5.5).Ticks).ToShortTimeString());
+                UIManager.Instance.SetComfort(weatherMainData.main.humidity, weatherMainData.main.pressure);
+                UIManager.Instance.SetLocationAndTime(weatherMainData.name, Utility.GetTimeFromUNIX(weatherMainData.dt));
                 UIManager.Instance.SetTemperature(weatherMainData.main.temp, weatherMainData.main.temp_max, weatherMainData.main.temp_min);
                 UIManager.Instance.SetWeatherDetails(icon, weatherMainData.weather[0].main, weatherMainData.weather[0].description);
             }

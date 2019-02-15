@@ -60,6 +60,10 @@ public static class Utility
         }
     }
 
+    public static string GetTimeFromUNIX(long unixTimeStamp)
+    {
+        return new DateTime(TimeSpan.FromSeconds(unixTimeStamp).Ticks + TimeSpan.FromHours(5.5).Ticks).ToShortTimeString();
+    }
 
     public static string GetTitleCase(string str)
     {

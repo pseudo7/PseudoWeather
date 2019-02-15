@@ -20,6 +20,9 @@ public class UIManager : MonoBehaviour
     public Text lastUpdateText;
     [Header("Comfort")]
     public SpiralMeter humidityMeter;
+    public LinearSlider pressureSlider;
+    public Text humidityText;
+    public Text pressureText;
 
     private void Awake()
     {
@@ -27,9 +30,12 @@ public class UIManager : MonoBehaviour
             Instance = this;
     }
 
-    public void SetComfort(float humidity)
+    public void SetComfort(float humidity, int pressure)
     {
         humidityMeter.SetMeterValue(humidity);
+        pressureSlider.SetSliderValue(pressure);
+        humidityText.text = string.Format("Humidity: {0}/100", humidity);
+        pressureText.text = string.Format("Pressure: {0} hPa", pressure);
     }
 
     public void SetLocationAndTime(string location, string time)
