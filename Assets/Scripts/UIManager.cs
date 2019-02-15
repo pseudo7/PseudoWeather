@@ -23,11 +23,23 @@ public class UIManager : MonoBehaviour
     public LinearSlider pressureSlider;
     public Text humidityText;
     public Text pressureText;
+    [Header("Wind")]
+    public Text windSpeedText;
+    public Text windDirectionText;
+    public Transform direction;
 
     private void Awake()
     {
         if (!Instance)
             Instance = this;
+    }
+
+    public void SetWindInfo(double speed, int deg)
+    {
+        windSpeedText.text = string.Format("Speed: {0}m/s", speed);
+        windDirectionText.text = string.Format("Direction: {0}°", deg % 90);
+        foreach (Transform dir in direction) dir.GetComponent<Text>().color = Color.grey;
+        direction.GetChild(deg / 90).GetComponent<Text>().color = Color.white;
     }
 
     public void SetComfort(float humidity, int pressure)
