@@ -18,12 +18,18 @@ public class UIManager : MonoBehaviour
     [Header("Temperature")]
     public Text locationText;
     public Text lastUpdateText;
-
+    [Header("Comfort")]
+    public SpiralMeter humidityMeter;
 
     private void Awake()
     {
         if (!Instance)
             Instance = this;
+    }
+
+    public void SetComfort(float humidity)
+    {
+        humidityMeter.SetMeterValue(humidity);
     }
 
     public void SetLocationAndTime(string location, string time)

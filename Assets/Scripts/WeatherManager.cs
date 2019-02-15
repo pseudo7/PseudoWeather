@@ -43,7 +43,7 @@ public class WeatherManager : MonoBehaviour
     {
         if (Application.internetReachability != NetworkReachability.NotReachable)
             if (!gettingWeather)
-                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, true)));
+                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, false)));
             else Debug.LogError("Patience");
         else Debug.LogError("NO INTERNET");
     }
@@ -64,6 +64,7 @@ public class WeatherManager : MonoBehaviour
                 texture.LoadImage(iconRequest.downloadHandler.data);
                 Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
 
+                UIManager.Instance.SetComfort(weatherMainData.main.humidity);
                 UIManager.Instance.SetLocationAndTime(weatherMainData.name, new DateTime(TimeSpan.FromSeconds(weatherMainData.dt).Ticks + TimeSpan.FromHours(5.5).Ticks).ToShortTimeString());
                 UIManager.Instance.SetTemperature(weatherMainData.main.temp, weatherMainData.main.temp_max, weatherMainData.main.temp_min);
                 UIManager.Instance.SetWeatherDetails(icon, weatherMainData.weather[0].main, weatherMainData.weather[0].description);
