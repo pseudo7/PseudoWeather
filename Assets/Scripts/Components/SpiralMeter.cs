@@ -13,17 +13,20 @@ public class SpiralMeter : MonoBehaviour
     void Start()
     {
         meterImg = transform.GetChild(0).GetComponent<Image>();
-        valueText = transform.GetChild(1).GetChild(0).GetComponent<Text>();
+        if (transform.childCount > 1)
+            valueText = transform.GetChild(1).GetChild(0).GetComponent<Text>();
     }
 
     public void SetMeterValue(float val)
     {
-        valueText.text = string.Format("{0}%", val.ToString("0#"));
+        if (valueText)
+            valueText.text = string.Format("{0}%", val.ToString("0#"));
         StartCoroutine(FillMeter(val / 100f));
     }
 
     IEnumerator FillMeter(float val)
     {
+        Debug.Log("VALE: " + val);
         var fillStep = 1f / fillSpeed;
         meterImg.fillAmount = 0;
         yield return new WaitForEndOfFrame();

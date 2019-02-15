@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,11 +27,31 @@ public class UIManager : MonoBehaviour
     public Text windSpeedText;
     public Text windDirectionText;
     public Transform direction;
+    [Header("Sun")]
+    public SpiralMeter sunMeter;
+    public Text sunriseTimeText;
+    public Text sunsetTimeText;
+    public Text timeLeftText;
 
     private void Awake()
     {
         if (!Instance)
             Instance = this;
+    }
+
+    public void SetSunInfo(long sunriseTime, long sunsetTime, long lastUpdated)
+    {
+        sunriseTimeText.text = Utility.GetTimeFromUNIX(sunriseTime);
+        sunsetTimeText.text = Utility.GetTimeFromUNIX(sunsetTime);
+
+        long sunriseTicks = DateTime.Parse(sunriseTimeText.text).Ticks;
+        long sunsetTicks = DateTime.Parse(sunsetTimeText.text).Ticks;
+        long now = DateTime.Now.Ticks;
+        long diff = sunsetTicks - now;
+        if (diff > 0)
+            timeLeftText.text = string.Format("Time Left\n{0} Hours", new DateTime(diff).ToString("HH:mm"));
+        else Debug.LogError("Already Sunset");
+        sunMeter.SetMeterValue(now / (float)sunsetTicks * 100);
     }
 
     public void SetWindInfo(double speed, int deg)

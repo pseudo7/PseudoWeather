@@ -73,8 +73,8 @@ public class Serializables
         public int id;
         public double message;
         public string country;
-        public int sunrise;
-        public int sunset;
+        public long sunrise;
+        public long sunset;
 
         public override string ToString()
         {
