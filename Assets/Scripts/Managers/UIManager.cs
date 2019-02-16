@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     [Header("Misc")]
     public Transform masterScroll;
     public Image weatherIcon;
+    public CanvasGroup canvasGroup;
     [Header("Temperature")]
     public Text currentTemp;
     public Text maxTemp;
@@ -34,10 +35,15 @@ public class UIManager : MonoBehaviour
     public Text sunsetTimeText;
     public Text timeLeftText;
 
+    static ScreenOrientation currentOrientation;
+
     private void Awake()
     {
         if (!Instance)
             Instance = this;
+        currentOrientation = Screen.orientation;
+        StartCoroutine(CheckForOrientation());
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
     public void SetSunInfo(long sunriseTime, long sunsetTime, long lastUpdated)
@@ -48,9 +54,9 @@ public class UIManager : MonoBehaviour
         long sunriseTicks = DateTime.Parse(sunriseTimeText.text).Ticks;
         long sunsetTicks = DateTime.Parse(sunsetTimeText.text).Ticks;
         long now = DateTime.Now.Ticks;
-        long diff = sunsetTicks - now;
+        long diff = sunriseTicks - now;
         if (diff > 0)
-            timeLeftText.text = string.Format("Time Left\n{0} Hours", new DateTime(diff).ToString("HH:mm"));
+            timeLeftText.text = string.Format("Time Left\n{0} Hours", new DateTime(diff).ToString("hh:mm"));
         else timeLeftText.text = "Already Sunset";
         sunMeter.SetMeterValue(now / (float)sunsetTicks * 100);
     }
@@ -117,5 +123,58 @@ public class UIManager : MonoBehaviour
                 yield return new WaitForEndOfFrame();
             }
         }
+    }
+
+    public void RefreshScroll()
+    {
+        StartCoroutine(Refresh());
+    }
+
+    IEnumerator Refresh()
+    {
+        yield return StartCoroutine(ToggleScroll(false));
+        StartCoroutine(ToggleScroll(true));
+    }
+
+    IEnumerator CheckForOrientation()
+    {
+        while (gameObject.activeInHierarchy)
+        {
+            if (Screen.orientation == ScreenOrientation.Landscape)
+                yield return StartCoroutine(ToggleCanvasAlpha(false));
+            else
+                yield return StartCoroutine(ToggleCanvasAlpha(true));
+            yield return new WaitForSeconds(1);
+        }
+    }
+
+    IEnumerator ToggleCanvasAlpha(bool show)
+    {
+        var targetAplha = show ? 1f : 0f;
+        if (show)
+        {
+            if (currentOrientation != ScreenOrientation.Portrait)
+            {
+                while (canvasGroup.alpha < targetAplha)
+                {
+                    canvasGroup.alpha += .075f;
+                    yield return new WaitForEndOfFrame();
+                }
+                canvasGroup.blocksRaycasts = true;
+            }
+        }
+        else
+        {
+            if (currentOrientation != ScreenOrientation.Landscape)
+            {
+                while (canvasGroup.alpha > targetAplha)
+                {
+                    canvasGroup.alpha -= .075f;
+                    yield return new WaitForEndOfFrame();
+                }
+                canvasGroup.blocksRaycasts = false;
+            }
+        }
+        currentOrientation = Screen.orientation;
     }
 }

@@ -9,6 +9,9 @@ public class WeatherManager : MonoBehaviour
     public static WeatherManager Instance;
 
     public Transform mainLight;
+    public Skybox skybox;
+    public Material nightSkyMat;
+    public Material daySkyMat;
 
     static bool gettingWeather;
 
@@ -16,6 +19,8 @@ public class WeatherManager : MonoBehaviour
     {
         if (!Instance)
             Instance = this;
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.ExponentialSquared;
     }
 
     void Start()
@@ -36,11 +41,16 @@ public class WeatherManager : MonoBehaviour
         int hours = int.Parse(hoursMin[0]), mins = int.Parse(hoursMin[1]);
         const float DEG_PER_MINUTE = 360f / (24 * 60);
         var degToRotate = 270 + (hours * 60 + mins) * DEG_PER_MINUTE;
+        degToRotate %= 360;
+
+        if ((degToRotate > 210 || degToRotate < -30))
+            SetNightSky(true);
+        else SetNightSky(false);
 
         while (gameObject.activeInHierarchy)
         {
             mainLight.rotation = Quaternion.Euler(degToRotate, 0, 0);
-            yield return new WaitForSeconds(60);
+            yield return new WaitForSeconds(300);
         }
     }
 
@@ -53,18 +63,34 @@ public class WeatherManager : MonoBehaviour
         }
         if (Application.internetReachability != NetworkReachability.NotReachable)
             if (!gettingWeather)
-                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, false)));
+                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, true)));
             else Debug.LogError("Patience");
         else Debug.LogError("NO INTERNET");
+    }
+
+    public void SetNightSky(bool enable)
+    {
+        skybox.material = enable ? nightSkyMat : daySkyMat;
     }
 
     IEnumerator StartWeatherCoroutine(string requestURL)
     {
         gettingWeather = true;
-        Debug.Log("URL: " + requestURL);
+        Handheld.StartActivityIndicator();
+        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Small);
+
         using (UnityWebRequest weatherRequest = UnityWebRequest.Get(requestURL))
         {
             yield return weatherRequest.SendWebRequest();
+
+            if (weatherRequest.isNetworkError)
+            {
+                Debug.LogError(weatherRequest.error);
+                Handheld.StopActivityIndicator();
+                gettingWeather = false;
+                yield break;
+            }
+
             Serializables.WeatherMain weatherMainData = JsonUtility.FromJson<Serializables.WeatherMain>(weatherRequest.downloadHandler.text);
             Debug.Log(weatherMainData);
             using (UnityWebRequest iconRequest = UnityWebRequestTexture.GetTexture(Constants.WEATHER_ICON_URL + weatherMainData.weather[0].icon + ".png"))
@@ -74,6 +100,8 @@ public class WeatherManager : MonoBehaviour
                 texture.LoadImage(iconRequest.downloadHandler.data);
                 Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
 
+                CloudManager.Instance.SpawnClouds(CloudType.Thunder);
+
                 UIManager.Instance.SetSunInfo(weatherMainData.sys.sunrise, weatherMainData.sys.sunset, weatherMainData.dt);
                 UIManager.Instance.SetWindInfo(weatherMainData.wind.speed, weatherMainData.wind.deg);
                 UIManager.Instance.SetComfort(weatherMainData.main.humidity, weatherMainData.main.pressure);
@@ -82,6 +110,7 @@ public class WeatherManager : MonoBehaviour
                 UIManager.Instance.SetWeatherDetails(icon, weatherMainData.weather[0].main, weatherMainData.weather[0].description);
             }
         }
+        Handheld.StopActivityIndicator();
         UIManager.Instance.ToggleScrollView(true);
         gettingWeather = false;
     }
