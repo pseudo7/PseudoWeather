@@ -14,6 +14,7 @@ public class WeatherManager : MonoBehaviour
     public Material daySkyMat;
 
     static bool gettingWeather;
+    static string lastCitySearched = "Chandigarh";
 
     void Awake()
     {
@@ -21,6 +22,7 @@ public class WeatherManager : MonoBehaviour
             Instance = this;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
+        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Small);
     }
 
     void Start()
@@ -61,9 +63,19 @@ public class WeatherManager : MonoBehaviour
             Debug.LogError("Incorrect Name");
             return;
         }
+        else lastCitySearched = cityName;
         if (Application.internetReachability != NetworkReachability.NotReachable)
             if (!gettingWeather)
-                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName, true)));
+                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName)));
+            else Debug.LogError("Patience");
+        else Debug.LogError("NO INTERNET");
+    }
+
+    public void GetWeather()
+    {
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+            if (!gettingWeather)
+                StartCoroutine(StartWeatherCoroutine(Utility.GetURL(lastCitySearched)));
             else Debug.LogError("Patience");
         else Debug.LogError("NO INTERNET");
     }
@@ -77,7 +89,6 @@ public class WeatherManager : MonoBehaviour
     {
         gettingWeather = true;
         Handheld.StartActivityIndicator();
-        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Small);
 
         using (UnityWebRequest weatherRequest = UnityWebRequest.Get(requestURL))
         {
@@ -100,7 +111,7 @@ public class WeatherManager : MonoBehaviour
                 texture.LoadImage(iconRequest.downloadHandler.data);
                 Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
 
-                CloudManager.Instance.ShowClouds(CloudType.Thunder);
+                UpdateEnvironment(GetEnvironmentType(weatherMainData.weather[0].id));
 
                 UIManager.Instance.SetSunInfo(weatherMainData.sys.sunrise, weatherMainData.sys.sunset, weatherMainData.dt);
                 UIManager.Instance.SetWindInfo(weatherMainData.wind.speed, weatherMainData.wind.deg);
@@ -114,4 +125,75 @@ public class WeatherManager : MonoBehaviour
         UIManager.Instance.ToggleScrollView(true);
         gettingWeather = false;
     }
+
+    void UpdateEnvironment(EnvironmentType environmentType)
+    {
+        Debug.Log(environmentType);
+        switch (environmentType)
+        {
+            case EnvironmentType.Thunderstrom:
+                CloudManager.Instance.ShowClouds(CloudType.Thunder);
+                break;
+
+            case EnvironmentType.Drizzle:
+                CloudManager.Instance.ShowClouds(CloudType.Medium);
+                break;
+
+            case EnvironmentType.Rain:
+                CloudManager.Instance.ShowClouds(CloudType.Heavy);
+                break;
+
+            case EnvironmentType.Snow:
+                CloudManager.Instance.ShowClouds(CloudType.Heavy);
+                MistManager.Instance.ShowMist(MistType.Medium);
+                break;
+
+            case EnvironmentType.Atmosphere:
+                MistManager.Instance.ShowMist(MistType.Heavy);
+                break;
+
+            case EnvironmentType.Clear:
+                break;
+
+            case EnvironmentType.LightClouds:
+                CloudManager.Instance.ShowClouds(CloudType.Light);
+                break;
+
+            case EnvironmentType.ScatteredClouds:
+                CloudManager.Instance.ShowClouds(CloudType.Medium);
+                break;
+
+            case EnvironmentType.OvercastClouds:
+                CloudManager.Instance.ShowClouds(CloudType.Heavy);
+                break;
+        }
+    }
+
+    EnvironmentType GetEnvironmentType(int code)
+    {
+        Debug.Log("Weather Code: " + code);
+        switch (code)
+        {
+            case 800: return EnvironmentType.Clear;
+            case 801: return EnvironmentType.LightClouds;
+            case 802: return EnvironmentType.ScatteredClouds;
+            case 803: return EnvironmentType.ScatteredClouds;
+            case 804: return EnvironmentType.OvercastClouds;
+        }
+
+        switch (code / 100)
+        {
+            case 2: return EnvironmentType.Thunderstrom;
+            case 3: return EnvironmentType.Drizzle;
+            case 5: return EnvironmentType.Rain;
+            case 6: return EnvironmentType.Snow;
+            case 7: return EnvironmentType.Atmosphere;
+            default: return EnvironmentType.Clear;
+        }
+    }
+}
+
+public enum EnvironmentType
+{
+    Thunderstrom, Drizzle, Rain, Snow, Atmosphere, Clear, LightClouds, ScatteredClouds, OvercastClouds
 }

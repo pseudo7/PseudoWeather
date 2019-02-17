@@ -6,12 +6,17 @@ using UnityEngine.Networking;
 
 public static class Utility
 {
-    static List<string> cityNames;
     public static Serializables.CityInfo[] cityInfos;
 
-    public static string GetURL(string cityName, bool isMetricUnits)
+    static List<string> cityNames;
+
+    public static bool IsFahrenheit { get; set; }
+
+    public static string TempSymbol { get { return IsFahrenheit ? "F" : "C"; } }
+
+    public static string GetURL(string cityName)
     {
-        return string.Format("{0}{1}&{2}&{3}", Constants.MAIN_URL, GetCityID(cityName), Constants.API_KEY, isMetricUnits ? Constants.WEATHER_METRIC_UNITS : Constants.WEATHER_IMPERIAL_UNITS);
+        return string.Format("{0}{1}&{2}&{3}", Constants.MAIN_URL, GetCityID(cityName), Constants.API_KEY, IsFahrenheit ? Constants.WEATHER_IMPERIAL_UNITS : Constants.WEATHER_METRIC_UNITS);
     }
 
     public static List<string> CityNames

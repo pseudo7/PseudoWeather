@@ -34,4 +34,10 @@ public class GyroCamera : MonoBehaviour
             transform.eulerAngles = new Vector3(xRotation, yRotation, 0);
         }
     }
+
+    public void ResetCamera()
+    {
+        xRotation = yRotation = 0;
+        transform.rotation = Quaternion.identity;
+    }
 }

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AtmosphereManager : MonoBehaviour
+public class MistManager : MonoBehaviour
 {
-    public static AtmosphereManager Instance;
+    public static MistManager Instance;
 
     public GameObject[] mists;
     public Transform mistParent;
-    public MistType mistType;
 
     static Transform mainCamTransform;
 
@@ -29,11 +28,6 @@ public class AtmosphereManager : MonoBehaviour
         };
 
         if (!mainCamTransform) mainCamTransform = Camera.main.transform;
-    }
-
-    private void Start()
-    {
-        SpawnMist(mistMap[mistType]);
     }
 
     public void ShowMist(MistType mistType)

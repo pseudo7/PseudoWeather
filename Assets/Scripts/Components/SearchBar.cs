@@ -33,6 +33,17 @@ public class SearchBar : MonoBehaviour
         UpdateResults(Utility.GetMatchCityNames(searchIF.text.Trim()));
     }
 
+    public void OnSubmit()
+    {
+        string searchKeyword = searchIF.text.Trim();
+        if (Utility.CityNames.Contains(searchKeyword))
+        {
+            WeatherManager.Instance.GetWeather(searchKeyword);
+            resultPanel.SetActive(false);
+        }
+        else Debug.LogError("NO SUCH CITY");
+    }
+
     public void UpdateResults(List<string> matchedNames)
     {
         DisableAllResults();

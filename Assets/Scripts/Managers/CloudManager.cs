@@ -45,7 +45,7 @@ public class CloudManager : MonoBehaviour
                 .transform.LookAt(mainCamTransform);
     }
 
-    public void SetCloudColor(Color color)
+    void SetCloudColor(Color color)
     {
         foreach (var cloud in clouds) cloud.GetComponent<SpriteRenderer>().color = color;
     }

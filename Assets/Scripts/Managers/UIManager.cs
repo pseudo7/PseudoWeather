@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     public Transform masterScroll;
     public Image weatherIcon;
     public CanvasGroup canvasGroup;
+    public Button switchButton;
     [Header("Temperature")]
     public Text currentTemp;
     public Text maxTemp;
@@ -43,7 +44,6 @@ public class UIManager : MonoBehaviour
             Instance = this;
         currentOrientation = Screen.orientation;
         StartCoroutine(CheckForOrientation());
-        Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
     public void SetSunInfo(long sunriseTime, long sunsetTime, long lastUpdated)
@@ -54,10 +54,13 @@ public class UIManager : MonoBehaviour
         long sunriseTicks = DateTime.Parse(sunriseTimeText.text).Ticks;
         long sunsetTicks = DateTime.Parse(sunsetTimeText.text).Ticks;
         long now = DateTime.Now.Ticks;
-        long diff = sunriseTicks - now;
-        if (diff > 0)
-            timeLeftText.text = string.Format("Time Left\n{0} Hours", new DateTime(diff).ToString("hh:mm"));
-        else timeLeftText.text = "Already Sunset";
+
+        Debug.LogFormat("{0}\n{1}\n{2}\n{3}", sunriseTicks, sunsetTicks, now, new TimeSpan(12, 0, 0).Ticks);
+
+        if (now > sunsetTicks)
+            timeLeftText.text = string.Format("Sunrise In\n{0} Hours", new DateTime(sunriseTicks - (now - new TimeSpan(24, 0, 0).Ticks)).ToString("HH:mm"));
+        else if (now < sunsetTicks)
+            timeLeftText.text = string.Format("Sunset In\n{0} Hours", new DateTime(sunsetTicks - now).ToString("HH:mm"));
         sunMeter.SetMeterValue(now / (float)sunsetTicks * 100);
     }
 
@@ -85,9 +88,9 @@ public class UIManager : MonoBehaviour
 
     public void SetTemperature(double current, double max, double min)
     {
-        currentTemp.text = string.Format("{0}°", current);
-        maxTemp.text = string.Format("{0}°/", max);
-        minTemp.text = string.Format("{0}°", min);
+        currentTemp.text = string.Format("{0}°{1}", current, Utility.TempSymbol);
+        maxTemp.text = string.Format("{0}°{1}/", max, Utility.TempSymbol);
+        minTemp.text = string.Format("{0}°{1}", min, Utility.TempSymbol);
     }
 
     public void SetWeatherDetails(Sprite iconSprite, string title, string desc)
@@ -113,6 +116,7 @@ public class UIManager : MonoBehaviour
                 masterScroll.localScale = Vector3.MoveTowards(masterScroll.localScale, targetScale, .05f);
                 yield return new WaitForEndOfFrame();
             }
+            switchButton.interactable = true;
         }
         else
         {
@@ -122,18 +126,20 @@ public class UIManager : MonoBehaviour
                 masterScroll.localScale = Vector3.MoveTowards(masterScroll.localScale, targetScale, .05f);
                 yield return new WaitForEndOfFrame();
             }
+            switchButton.interactable = false;
         }
     }
 
-    public void RefreshScroll()
+    public void SwitchCF()
     {
-        StartCoroutine(Refresh());
+        StartCoroutine(Switch());
     }
 
-    IEnumerator Refresh()
+    IEnumerator Switch()
     {
         yield return StartCoroutine(ToggleScroll(false));
-        StartCoroutine(ToggleScroll(true));
+        Utility.IsFahrenheit = !Utility.IsFahrenheit;
+        WeatherManager.Instance.GetWeather();
     }
 
     IEnumerator CheckForOrientation()
@@ -173,6 +179,7 @@ public class UIManager : MonoBehaviour
                     yield return new WaitForEndOfFrame();
                 }
                 canvasGroup.blocksRaycasts = false;
+                FindObjectOfType<GyroCamera>().ResetCamera();
             }
         }
         currentOrientation = Screen.orientation;
