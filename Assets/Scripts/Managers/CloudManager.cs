@@ -6,6 +6,7 @@ public class CloudManager : MonoBehaviour
 {
     public static CloudManager Instance;
 
+    public Transform cloudParent;
     public GameObject[] clouds;
 
     static Transform mainCamTransform;
@@ -24,25 +25,34 @@ public class CloudManager : MonoBehaviour
             { CloudType.Heavy, new CloudInfo(250, 100, new Color( .8f, .8f, .8f), 0, Color.clear) },
             { CloudType.Thunder, new CloudInfo(300, 75, Color.grey, .1f, Color.grey)  }
         };
+        if (!mainCamTransform) mainCamTransform = Camera.main.transform;
     }
 
-    public void SpawnClouds(CloudType cloudType)
+    public void ShowClouds(CloudType cloudType)
     {
-        var radius = cloudMap[cloudType].spawnRadius;
-        SetCloudColor(cloudMap[cloudType].cloudColor);
-        if (!mainCamTransform) mainCamTransform = Camera.main.transform;
-
-        for (int i = 0; i < cloudMap[cloudType].cloudCount; i++)
-            Instantiate(clouds[Random.Range(0, clouds.Length)], new Vector3(Random.Range(-radius, radius), 30, Random.Range(-radius, radius)), Quaternion.identity)
-                .transform.LookAt(mainCamTransform);
+        DestroyAllClouds();
+        SpawnClouds(cloudMap[cloudType].cloudColor, cloudMap[cloudType].cloudCount, cloudMap[cloudType].spawnRadius);
 
         RenderSettings.fogColor = cloudMap[cloudType].fogColor;
         RenderSettings.fogDensity = cloudMap[cloudType].fogDensity;
     }
 
+    void SpawnClouds(Color cloudColor, int cloudCount, int radius)
+    {
+        SetCloudColor(cloudColor);
+        for (int i = 0; i < cloudCount; i++)
+            Instantiate(clouds[Random.Range(0, clouds.Length)], new Vector3(Random.Range(-radius, radius), 30, Random.Range(-radius, radius)), Quaternion.identity, cloudParent)
+                .transform.LookAt(mainCamTransform);
+    }
+
     public void SetCloudColor(Color color)
     {
         foreach (var cloud in clouds) cloud.GetComponent<SpriteRenderer>().color = color;
+    }
+
+    void DestroyAllClouds()
+    {
+        foreach (Transform cloud in cloudParent) Destroy(cloud.gameObject);
     }
 }
 

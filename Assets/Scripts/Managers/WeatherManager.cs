@@ -100,7 +100,7 @@ public class WeatherManager : MonoBehaviour
                 texture.LoadImage(iconRequest.downloadHandler.data);
                 Sprite icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
 
-                CloudManager.Instance.SpawnClouds(CloudType.Thunder);
+                CloudManager.Instance.ShowClouds(CloudType.Thunder);
 
                 UIManager.Instance.SetSunInfo(weatherMainData.sys.sunrise, weatherMainData.sys.sunset, weatherMainData.dt);
                 UIManager.Instance.SetWindInfo(weatherMainData.wind.speed, weatherMainData.wind.deg);
