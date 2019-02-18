@@ -45,7 +45,7 @@ public class WeatherManager : MonoBehaviour
         var degToRotate = 270 + (hours * 60 + mins) * DEG_PER_MINUTE;
         degToRotate %= 360;
 
-        if ((degToRotate > 210 || degToRotate < -30))
+        if ((degToRotate >= 210 || degToRotate <= -30))
             SetNightSky(true);
         else SetNightSky(false);
 
@@ -68,7 +68,7 @@ public class WeatherManager : MonoBehaviour
             if (!gettingWeather)
                 StartCoroutine(StartWeatherCoroutine(Utility.GetURL(cityName)));
             else Debug.LogError("Patience");
-        else Debug.LogError("NO INTERNET");
+        else UIManager.Instance.ShowWarning();
     }
 
     public void GetWeather()
@@ -77,7 +77,7 @@ public class WeatherManager : MonoBehaviour
             if (!gettingWeather)
                 StartCoroutine(StartWeatherCoroutine(Utility.GetURL(lastCitySearched)));
             else Debug.LogError("Patience");
-        else Debug.LogError("NO INTERNET");
+        else UIManager.Instance.ShowWarning();
     }
 
     public void SetNightSky(bool enable)

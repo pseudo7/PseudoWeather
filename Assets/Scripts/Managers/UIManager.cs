@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     public Image weatherIcon;
     public CanvasGroup canvasGroup;
     public Button switchButton;
+    public GameObject warningPanel;
     [Header("Temperature")]
     public Text currentTemp;
     public Text maxTemp;
@@ -53,15 +54,22 @@ public class UIManager : MonoBehaviour
 
         long sunriseTicks = DateTime.Parse(sunriseTimeText.text).Ticks;
         long sunsetTicks = DateTime.Parse(sunsetTimeText.text).Ticks;
-        long now = DateTime.Now.Ticks;
+        long nowTicks = DateTime.Now.Ticks;
 
-        Debug.LogFormat("{0}\n{1}\n{2}\n{3}", sunriseTicks, sunsetTicks, now, new TimeSpan(12, 0, 0).Ticks);
+        int sunriseMinutes = DateTime.Parse(sunriseTimeText.text).Minute;
+        int sunsetMinutes = DateTime.Parse(sunsetTimeText.text).Minute;
+        int nowMinutes = DateTime.Now.Minute;
 
-        if (now > sunsetTicks)
-            timeLeftText.text = string.Format("Sunrise In\n{0} Hours", new DateTime(sunriseTicks - (now - new TimeSpan(24, 0, 0).Ticks)).ToString("HH:mm"));
-        else if (now < sunsetTicks)
-            timeLeftText.text = string.Format("Sunset In\n{0} Hours", new DateTime(sunsetTicks - now).ToString("HH:mm"));
-        sunMeter.SetMeterValue(now / (float)sunsetTicks * 100);
+        if (nowTicks > sunsetTicks)
+        {
+            timeLeftText.text = string.Format("Sunrise In\n{0} Hours", new DateTime(sunriseTicks - (nowTicks - new TimeSpan(24, 0, 0).Ticks)).ToString("HH:mm"));
+            sunMeter.SetMeterValue(100);
+        }
+        else if (nowTicks < sunsetTicks)
+        {
+            timeLeftText.text = string.Format("Sunset In\n{0} Hours", new DateTime(sunsetTicks - nowTicks).ToString("HH:mm"));
+            sunMeter.SetMeterValue((nowTicks - sunriseTicks) / (float)(sunsetTicks - sunriseTicks) * 100);
+        }
     }
 
     public void SetWindInfo(double speed, int deg)
@@ -79,6 +87,8 @@ public class UIManager : MonoBehaviour
         humidityText.text = string.Format("Humidity: {0}/100", humidity);
         pressureText.text = string.Format("Pressure: {0} hPa", pressure);
     }
+
+
 
     public void SetLocationAndTime(string location, string time)
     {
@@ -105,6 +115,16 @@ public class UIManager : MonoBehaviour
         StartCoroutine(ToggleScroll(show));
     }
 
+    public void ShowWarning()
+    {
+        warningPanel.ScaleGameObject(true);
+    }
+
+    public void HideWarning()
+    {
+        warningPanel.ScaleGameObject(false);
+    }
+
     IEnumerator ToggleScroll(bool show)
     {
         if (show)
@@ -127,6 +147,34 @@ public class UIManager : MonoBehaviour
                 yield return new WaitForEndOfFrame();
             }
             switchButton.interactable = false;
+        }
+    }
+
+    public void ScaleGO(GameObject gameObject, bool show)
+    {
+        StartCoroutine(Toggle(gameObject, show));
+    }
+
+    IEnumerator Toggle(GameObject gameObject, bool show)
+    {
+        if (show)
+        {
+            yield return new WaitForEndOfFrame();
+            var targetScale = Vector3.one;
+            while (gameObject.transform.localScale != targetScale)
+            {
+                gameObject.transform.localScale = Vector3.MoveTowards(gameObject.transform.localScale, targetScale, .1f);
+                yield return new WaitForEndOfFrame();
+            }
+        }
+        else
+        {
+            var targetScale = Vector3.zero;
+            while (gameObject.transform.localScale != targetScale)
+            {
+                gameObject.transform.localScale = Vector3.MoveTowards(gameObject.transform.localScale, targetScale, .1f);
+                yield return new WaitForEndOfFrame();
+            }
         }
     }
 

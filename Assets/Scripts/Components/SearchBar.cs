@@ -24,6 +24,8 @@ public class SearchBar : MonoBehaviour
     {
         if (string.IsNullOrEmpty(searchIF.text))
             Debug.LogError("ERROR");
+        else if (Application.internetReachability == NetworkReachability.NotReachable)
+            UIManager.Instance.ShowWarning();
         else
             WeatherManager.Instance.GetWeather(searchIF.text);
     }

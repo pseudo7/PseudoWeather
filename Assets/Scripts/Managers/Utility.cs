@@ -62,6 +62,11 @@ public static class Utility
         return -1;
     }
 
+    public static void ScaleGameObject(this GameObject gameObj, bool show)
+    {
+        UIManager.Instance.ScaleGO(gameObj, show);
+    }
+
     public static List<string> GetMatchCityNames(string keyword)
     {
         List<string> matches = new List<string>();

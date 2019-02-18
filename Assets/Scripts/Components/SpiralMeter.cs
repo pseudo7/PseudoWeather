@@ -19,8 +19,7 @@ public class SpiralMeter : MonoBehaviour
 
     public void SetMeterValue(float val)
     {
-        if (valueText)
-            valueText.text = string.Format("{0}%", val.ToString("0#"));
+        if (valueText) valueText.text = string.Format("{0}%", val.ToString("0#"));
         StartCoroutine(FillMeter(val / 100f));
     }
 
