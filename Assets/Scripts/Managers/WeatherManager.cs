@@ -129,6 +129,8 @@ public class WeatherManager : MonoBehaviour
     void UpdateEnvironment(EnvironmentType environmentType)
     {
         Debug.Log(environmentType);
+        CloudManager.Instance.ClearClouds();
+        MistManager.Instance.ClearMist();
         switch (environmentType)
         {
             case EnvironmentType.Thunderstrom:

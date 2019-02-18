@@ -30,6 +30,11 @@ public class MistManager : MonoBehaviour
         if (!mainCamTransform) mainCamTransform = Camera.main.transform;
     }
 
+    public void ClearMist()
+    {
+        DestroyAllMists();
+    }
+
     public void ShowMist(MistType mistType)
     {
         DestroyAllMists();

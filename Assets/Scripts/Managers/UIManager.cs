@@ -37,14 +37,12 @@ public class UIManager : MonoBehaviour
     public Text sunsetTimeText;
     public Text timeLeftText;
 
-    static ScreenOrientation currentOrientation;
+    static ScreenOrientation currentOrientation = ScreenOrientation.Portrait;
 
     private void Awake()
     {
         if (!Instance)
             Instance = this;
-        currentOrientation = Screen.orientation;
-        StartCoroutine(CheckForOrientation());
     }
 
     public void SetSunInfo(long sunriseTime, long sunsetTime, long lastUpdated)
@@ -74,7 +72,7 @@ public class UIManager : MonoBehaviour
 
     public void SetWindInfo(double speed, int deg)
     {
-        windSpeedText.text = string.Format("Speed: {0}m/s", speed);
+        windSpeedText.text = string.Format("Speed: {0}{1}", speed, Utility.WindSymbol);
         windDirectionText.text = string.Format("Direction: {0}°", deg % 90);
         foreach (Transform dir in direction) dir.GetComponent<Text>().color = Color.grey;
         direction.GetChild(deg / 90).GetComponent<Text>().color = Color.white;
@@ -87,8 +85,6 @@ public class UIManager : MonoBehaviour
         humidityText.text = string.Format("Humidity: {0}/100", humidity);
         pressureText.text = string.Format("Pressure: {0} hPa", pressure);
     }
-
-
 
     public void SetLocationAndTime(string location, string time)
     {
@@ -186,20 +182,21 @@ public class UIManager : MonoBehaviour
     IEnumerator Switch()
     {
         yield return StartCoroutine(ToggleScroll(false));
-        Utility.IsFahrenheit = !Utility.IsFahrenheit;
+        Utility.AreUnitsImperial = !Utility.AreUnitsImperial;
         WeatherManager.Instance.GetWeather();
     }
 
-    IEnumerator CheckForOrientation()
+    public void ToggleRotatation()
     {
-        while (gameObject.activeInHierarchy)
-        {
-            if (Screen.orientation == ScreenOrientation.Landscape)
-                yield return StartCoroutine(ToggleCanvasAlpha(false));
-            else
-                yield return StartCoroutine(ToggleCanvasAlpha(true));
-            yield return new WaitForSeconds(1);
-        }
+        if (currentOrientation == ScreenOrientation.Portrait)
+            StartCoroutine(ChangeOrientation(false));
+        else if (currentOrientation == ScreenOrientation.Landscape)
+            StartCoroutine(ChangeOrientation(true));
+    }
+
+    IEnumerator ChangeOrientation(bool showCanvas)
+    {
+        yield return StartCoroutine(ToggleCanvasAlpha(showCanvas));
     }
 
     IEnumerator ToggleCanvasAlpha(bool show)
@@ -207,29 +204,24 @@ public class UIManager : MonoBehaviour
         var targetAplha = show ? 1f : 0f;
         if (show)
         {
-            if (currentOrientation != ScreenOrientation.Portrait)
+            currentOrientation = Screen.orientation = ScreenOrientation.Portrait;
+            while (canvasGroup.alpha < targetAplha)
             {
-                while (canvasGroup.alpha < targetAplha)
-                {
-                    canvasGroup.alpha += .075f;
-                    yield return new WaitForEndOfFrame();
-                }
-                canvasGroup.blocksRaycasts = true;
+                canvasGroup.alpha += .075f;
+                yield return new WaitForEndOfFrame();
             }
+            canvasGroup.blocksRaycasts = true;
         }
         else
         {
-            if (currentOrientation != ScreenOrientation.Landscape)
+            currentOrientation = Screen.orientation = ScreenOrientation.Landscape;
+            while (canvasGroup.alpha > targetAplha)
             {
-                while (canvasGroup.alpha > targetAplha)
-                {
-                    canvasGroup.alpha -= .075f;
-                    yield return new WaitForEndOfFrame();
-                }
-                canvasGroup.blocksRaycasts = false;
-                FindObjectOfType<GyroCamera>().ResetCamera();
+                canvasGroup.alpha -= .075f;
+                yield return new WaitForEndOfFrame();
             }
+            canvasGroup.blocksRaycasts = false;
+            FindObjectOfType<GyroCamera>().ResetCamera();
         }
-        currentOrientation = Screen.orientation;
     }
 }

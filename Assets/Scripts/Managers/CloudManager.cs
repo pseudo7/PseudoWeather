@@ -28,6 +28,11 @@ public class CloudManager : MonoBehaviour
         if (!mainCamTransform) mainCamTransform = Camera.main.transform;
     }
 
+    public void ClearClouds()
+    {
+        DestroyAllClouds();
+    }
+
     public void ShowClouds(CloudType cloudType)
     {
         DestroyAllClouds();

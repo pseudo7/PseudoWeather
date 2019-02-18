@@ -10,13 +10,15 @@ public static class Utility
 
     static List<string> cityNames;
 
-    public static bool IsFahrenheit { get; set; }
+    public static bool AreUnitsImperial { get; set; }
 
-    public static string TempSymbol { get { return IsFahrenheit ? "F" : "C"; } }
+    public static string TempSymbol { get { return AreUnitsImperial ? "F" : "C"; } }
+
+    public static string WindSymbol { get { return AreUnitsImperial ? "mph" : "m/s"; } }
 
     public static string GetURL(string cityName)
     {
-        return string.Format("{0}{1}&{2}&{3}", Constants.MAIN_URL, GetCityID(cityName), Constants.API_KEY, IsFahrenheit ? Constants.WEATHER_IMPERIAL_UNITS : Constants.WEATHER_METRIC_UNITS);
+        return string.Format("{0}{1}&{2}&{3}", Constants.MAIN_URL, GetCityID(cityName), Constants.API_KEY, AreUnitsImperial ? Constants.WEATHER_IMPERIAL_UNITS : Constants.WEATHER_METRIC_UNITS);
     }
 
     public static List<string> CityNames
